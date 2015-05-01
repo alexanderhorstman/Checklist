@@ -1,6 +1,5 @@
 package com.example.alexh.checklist;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -12,14 +11,33 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 public class SetDaily extends Activity {
-    StringArray list;
-    ListView theListView;
-    MyAdapter theAdapter;
-    int itemPriority = Globals.PRIORITY_DAILY;
+    private int itemPriority = Globals.PRIORITY_DAILY;
+    private ListView theListView;
+    private MyAdapter theAdapter;
+    private StringArray list;
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        //if result code is ok then save the new presets, if not do nothing
+        if (resultCode == Globals.RESULT_OK_EDIT_TASK) {
+            list.addItem((Item) data.getSerializableExtra("new item"));
+        }
+        else if(resultCode == Globals.RESULT_REPLACE_IN_LIST){
+            list.changeItemText(data.getIntExtra("item position", 0), (Item)data.getSerializableExtra("new item"));
+        }
+        updateAdapter();
+    }
+
+    @Override
+    public void onBackPressed() {
+        //set result code to canceled
+        setResult(RESULT_CANCELED);
+        //leave this activity
+        finish();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,13 +67,11 @@ public class SetDaily extends Activity {
                 //changes the selected state of the item that was clicked on
                 list.getItem(String.valueOf(parent.getItemAtPosition(position))).flipSelected();
                 //changes the image associated with the item that was clicked on
-                if(list.getItem(String.valueOf(parent.getItemAtPosition(position))).isSelected())
-                {
+                if(list.getItem(String.valueOf(parent.getItemAtPosition(position))).isSelected()) {
                     //selected image
                     image.setImageResource(R.drawable.check_box_selected);
                 }
-                else
-                {
+                else {
                     //unselected image
                     image.setImageResource(R.drawable.check_box_unselected);
                 }
@@ -73,7 +89,7 @@ public class SetDaily extends Activity {
                 //instantiates an edit text to add to the alert
                 final EditText input = new EditText(SetDaily.this);
                 final int pos = position;
-                input.setText(list.getItem(position).toString());
+                input.setText(list.getItem(position).getTask());
                 //sets this edit text to be the content of the alert
                 alert.setView(input);
                 //set the click behavior for the positive button click
@@ -83,13 +99,11 @@ public class SetDaily extends Activity {
                         //checks to make sure the text is not blank
                         if(!(input.getText().toString().equals(""))) {
                             //add the task to the list if it is not already in the list
-                            if(!list.contains(new Item(input.getText().toString(), itemPriority)))
-                            {
+                            if(!list.contains(new Item(input.getText().toString(), itemPriority))) {
                                 Item item = new Item(input.getText().toString(), Globals.PRIORITY_DAILY);
-                                list.changeText(pos, item);
+                                list.changeItemText(pos, item);
                             }
-                            else
-                            {
+                            else {
                                 Toast.makeText(SetDaily.this, "The item " + input.getText() + " is already in the list",
                                         Toast.LENGTH_SHORT).show();
                             }
@@ -116,8 +130,6 @@ public class SetDaily extends Activity {
     public void addItem(View view) {
         //instantiates an alert for the user to add a new task
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-        final AlertDialog dialog = alert.create();
         //sets the title of the alert
         alert.setTitle("Add a task to the list");
         //instantiates an edit text to add to the alert
@@ -150,45 +162,26 @@ public class SetDaily extends Activity {
         alert.show();
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        //if result code is ok then save the new presets, if not do nothing
-        if (resultCode == Globals.RESULT_OK_EDIT_TASK) {
-            list.addItem((Item) data.getSerializableExtra("new item"));
-        }
-        else if(resultCode == Globals.RESULT_REPLACE_IN_LIST){
-            list.changeText(data.getIntExtra("item position", 0), (Item)data.getSerializableExtra("new item"));
-        }
-        updateAdapter();
-    }
-
-    public void deleteSelected(View view)
-    {
+    public void deleteSelected(View view) {
         //holds the items to be deleted, will delete everything at once
-        int[] toDelete = new int[list.size()];
+        int[] toDelete = new int[list.sizeOf()];
         //instantiates the toDelete array with false values
-        for(int index = 0; index < list.size(); index++)
-        {
+        for(int index = 0; index < list.sizeOf(); index++) {
             toDelete[index] = -1;
         }
         //changes the toDelete values if the item at the index is selected
-        for(int index = 0; index < list.size(); index++)
-        {
+        for(int index = 0; index < list.sizeOf(); index++) {
             //checks selected state
-            if(list.checkSelectedAt(index))
-            {
+            if(list.checkSelectedAt(index)) {
                 //changes toDelete value at the index
                 //does not have to be "index", just has to not be -1
                 toDelete[index] = index;
             }
         }
         //deletes the items that were selected
-        for(int index = toDelete.length - 1; index >= 0; index--)
-        {
+        for(int index = toDelete.length - 1; index >= 0; index--) {
             //if toDelete value was changed
-            if(toDelete[index] != -1)
-            {
+            if(toDelete[index] != -1) {
                 //deletes item
                 list.deleteItem(index);
             }
@@ -199,8 +192,7 @@ public class SetDaily extends Activity {
         theListView.refreshDrawableState();
     }
 
-    public void savePresets(View view)
-    {
+    private void savePresets() {
         //create intent to send back
         Intent sendListBack = new Intent();
         //put list in the intent
@@ -211,8 +203,7 @@ public class SetDaily extends Activity {
         finish();
     }
 
-    public void savePresets()
-    {
+    public void savePresets(View view) {
         //create intent to send back
         Intent sendListBack = new Intent();
         //put list in the intent
@@ -223,17 +214,7 @@ public class SetDaily extends Activity {
         finish();
     }
 
-    @Override
-    public void onBackPressed()
-    {
-        //set result code to canceled
-        setResult(RESULT_CANCELED);
-        //leave this activity
-        finish();
-    }
-
-    public void updateAdapter()
-    {
+    private void updateAdapter() {
         //updates the adapter with a new list
         theAdapter = new MyAdapter(getApplicationContext(),list.getStringArray(),list);
         //sets the updated adapter to the list view

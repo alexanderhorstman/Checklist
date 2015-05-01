@@ -9,12 +9,21 @@ import android.widget.EditText;
 import android.widget.RadioGroup;
 
 public class EditTask extends Activity{
-    EditText editText;
-    RadioGroup radioGroup;
-    CheckBox checkBox;
-    boolean replaceInsteadOfAdd = false;
-    String textHolder;
-    int position;
+    private boolean replaceInsteadOfAdd = false;
+    private int position;
+
+    private CheckBox checkBox;
+    private EditText editText;
+    private RadioGroup radioGroup;
+    private String textHolder;
+
+    @Override
+    public void onBackPressed() {
+        //set result code to canceled
+        setResult(RESULT_CANCELED);
+        //leave this activity
+        finish();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,16 +36,14 @@ public class EditTask extends Activity{
         //
         position = previousActivity.getIntExtra("item position", 0);
         //
-        if(!editTextText.equals(""))
-        {
+        if(!editTextText.equals("")) {
             textHolder = editTextText;
             replaceInsteadOfAdd = true;
         }
         //get all of the views from this activity
         editText = (EditText) findViewById(R.id.taskDescriptionEditText);
         radioGroup = (RadioGroup) findViewById(R.id.priorityRadioGroup);
-        switch (previousActivity.getIntExtra("priority level", Globals.PRIORITY_NORMAL))
-        {
+        switch (previousActivity.getIntExtra("priority level", Globals.PRIORITY_NORMAL)) {
             case(Globals.PRIORITY_NORMAL):
                 radioGroup.check(R.id.radio_normal);
                 break;
@@ -50,17 +57,6 @@ public class EditTask extends Activity{
         checkBox = (CheckBox) findViewById(R.id.addToPresetsCheckBox);
         //set the edit text's text from the previous activity
         editText.setText(editTextText);
-
-
-    }
-
-    @Override
-    public void onBackPressed()
-    {
-        //set result code to canceled
-        setResult(RESULT_CANCELED);
-        //leave this activity
-        finish();
     }
 
     public void addItemToList(View view){
@@ -73,43 +69,35 @@ public class EditTask extends Activity{
             //leave this activity
             finish();
         }
-        if(checkBox.isChecked())
-        {
+        if(checkBox.isChecked()) {
             priority = Globals.PRIORITY_DAILY;
         }
-        if(id == R.id.radio_normal)
-        {
+        if(id == R.id.radio_normal) {
             priority = Globals.PRIORITY_NORMAL;
         }
-        else if(id == R.id.radio_rush)
-        {
+        else if(id == R.id.radio_rush) {
             priority = Globals.PRIORITY_RUSH;
         }
-        else if(id == R.id.radio_urgent)
-        {
+        else if(id == R.id.radio_urgent) {
             priority = Globals.PRIORITY_URGENT;
         }
         //create item to send back
         Item item = new Item(task, priority);
         //create intent to send back
         Intent sendItemBack = new Intent();
-        if(checkBox.isChecked() && !replaceInsteadOfAdd)
-        {
+        if(checkBox.isChecked() && !replaceInsteadOfAdd) {
             //set result code to ok and add to presets
             setResult(Globals.RESULT_OK_EDIT_TASK_WITH_ADD_PRESETS, sendItemBack);
         }
-        else if(replaceInsteadOfAdd && !checkBox.isChecked())
-        {
+        else if(replaceInsteadOfAdd && !checkBox.isChecked()) {
             setResult(Globals.RESULT_REPLACE_IN_LIST, sendItemBack);
             sendItemBack.putExtra("old item", textHolder);
         }
-        else if(replaceInsteadOfAdd && checkBox.isChecked())
-        {
+        else if(replaceInsteadOfAdd && checkBox.isChecked()) {
             setResult(Globals.RESULT_REPLACE_IN_LIST_WITH_ADD_PRESETS, sendItemBack);
             sendItemBack.putExtra("old item", textHolder);
         }
-        else
-        {
+        else {
             //set result code to ok
             setResult(Globals.RESULT_OK_EDIT_TASK, sendItemBack);
         }
@@ -121,7 +109,7 @@ public class EditTask extends Activity{
         finish();
     }
 
-    public  void returnToMainActivity(View view){
+    public  void returnToMainActivityOnCancel(View view){
         //set result code to canceled
         setResult(RESULT_CANCELED);
         //leave this activity

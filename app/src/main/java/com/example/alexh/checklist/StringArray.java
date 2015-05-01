@@ -4,55 +4,66 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class StringArray implements Serializable {
-    ArrayList<Item> list = new ArrayList<>();
+    private ArrayList<Item> list = new ArrayList<>();
 
     //constructor does nothing
     public StringArray(){}
 
     //constructor makes a list from an array of items
-    public StringArray(Item[] array)
-    {
-        for(int i = 0; i < array.length; i++)
-        {
+    public StringArray(Item[] array) {
+        for(int i = 0; i < array.length; i++) {
             list.add(array[i]);
         }
     }
 
     //adds an item to the list
-    public void addItem(Item item)
-    {
+    public void addItem(Item item) {
         int pos = list.size() - 1;
-        if(list.size() > 0){
-            while(pos >= 0 && item.priority > list.get(pos).priority){
+        //checks if there is anything in the list
+        if(list.size() > 0) {
+            //will put the new item in a position in the list based on its priority
+            while(pos >= 0 && item.getPriority() > list.get(pos).getPriority()){
                 pos--;
             }
             pos++;
             list.add(pos, item);
         }
-        else{
+        else {
             list.add(item);
         }
+    }
 
+    public void changeItemText(int position, Item item) {
+        list.set(position, item);
+    }
+
+    public boolean checkSelectedAt(int index) {
+        return list.get(index).isSelected();
+    }
+
+    public boolean contains(Item item) {
+        for(int i = 0; i < list.size(); i++) {
+            if(item.equals(getItem(i))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     //deletes an item from the list
-    public void deleteItem(Item item)
-    {
+    public void deleteItem(Item item) {
         list.remove(list.indexOf(item));
     }
 
-    public void deleteItem(int index)
-    {
+    //deletes an item from the list
+    public void deleteItem(int index) {
         list.remove(index);
     }
 
-    public Item getItem(String string)
-    {
+    public Item getItem(String string) {
         int index = -1;
-        for(int count = 0; count < list.size(); count++)
-        {
-            if(string.equals(list.get(count).task))
-            {
+        for(int count = 0; count < list.size(); count++) {
+            if(string.equals(list.get(count).getTask())) {
                 index = count;
                 count = list.size();
             }
@@ -60,83 +71,47 @@ public class StringArray implements Serializable {
         return list.get(index);
     }
 
-    public Item getItem(int position)
-    {
+    public Item getItem(int position) {
         return list.get(position);
     }
 
-
-    public boolean checkSelectedAt(int index)
-    {
-        return list.get(index).isSelected();
-    }
-
-    public int size()
-    {
-        return list.size();
-    }
-
     //returns an array of strings from the items in the list
-    public String[] getStringArray()
-    {
+    public String[] getStringArray() {
         String[] strings = new String[list.size()];
-        for(int index = 0; index < list.size(); index++)
-        {
-            strings[index] = list.get(index).toString();
+        for(int index = 0; index < list.size(); index++) {
+            strings[index] = list.get(index).getTask();
         }
         return strings;
     }
 
-    public void selectAll()
-    {
-        if(checkAllSelected())
-        {
-            for(int i = 0; i < list.size(); i++)
-            {
-                list.get(i).makeUnselected();
+    public void selectAll() {
+        if(checkAllSelected()) {
+            for(int i = 0; i < list.size(); i++) {
+                list.get(i).setSelected(false);
             }
         }
-        else
-        {
-            for(int i = 0; i < list.size(); i++)
-            {
-                list.get(i).makeSelected();
+        else {
+            for(int i = 0; i < list.size(); i++) {
+                list.get(i).setSelected(true);
             }
         }
 
     }
 
-    public boolean contains(Item item)
-    {
-        for(int i = 0; i < list.size(); i++)
-        {
-            if(item.equals(getItem(i)))
-            {
-                return true;
-            }
-        }
-        return false;
+    public int sizeOf() {
+        return list.size();
     }
 
-    public boolean checkAllSelected()
-    {
-        for(int i = 0; i < list.size(); i++)
-        {
-            if(!list.get(i).isSelected())
-            {
+    public void unselect(int position) {
+        list.get(position).setSelected(false);
+    }
+
+    private boolean checkAllSelected() {
+        for(int i = 0; i < list.size(); i++) {
+            if(!list.get(i).isSelected()) {
                 return false;
             }
         }
         return true;
-    }
-
-    public void changeText(int position, Item item)
-    {
-        list.set(position, item);
-    }
-
-    public void unselect(int position)
-    {
-        list.get(position).makeUnselected();
     }
 }
