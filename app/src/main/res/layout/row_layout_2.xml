@@ -29,4 +29,13 @@
         android:textColor="#ff000000"
         android:textSize="25sp" />
 
+    <TextView
+        android:id="@+id/reminder_text"
+        android:layout_below="@id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Reminder: "
+        android:textColor="#ff000000"
+        android:textSize="20sp"/>
+
 </RelativeLayout>

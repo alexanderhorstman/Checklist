@@ -28,6 +28,7 @@ class MyAdapter extends ArrayAdapter<String> {
             view = inflater.inflate(R.layout.row_layout_2, null);
             viewHolder.textView1 = (TextView) view.findViewById(R.id.textView1);
             viewHolder.imageView1 = (ImageView) view.findViewById(R.id.imageView1);
+            viewHolder.reminderText = (TextView) view.findViewById(R.id.reminder_text);
             view.setTag(viewHolder);
         }
         else {
@@ -35,11 +36,21 @@ class MyAdapter extends ArrayAdapter<String> {
         }
         String selectedItem = getItem(position);
         viewHolder.textView1.setText(selectedItem);
-        if(list.checkSelectedAt(position)) {
-            viewHolder.imageView1.setImageResource(R.drawable.check_box_selected);
+        if(list.getItem(position).hasReminder()) {
+            String reminderTime = list.getItem(position).getTime().toString() + " "
+                    + list.getItem(position).getDate().toString();
+            viewHolder.reminderText.setText("Reminder: " + reminderTime);
+            viewHolder.reminderText.setVisibility(View.VISIBLE);
         }
         else {
-            viewHolder.imageView1.setImageResource(R.drawable.check_box_unselected);
+            viewHolder.reminderText.setVisibility(View.GONE);
+        }
+
+        if(list.checkSelectedAt(position)) {
+            viewHolder.imageView1.setImageResource(R.drawable.check_box_selected_new);
+        }
+        else {
+            viewHolder.imageView1.setImageResource(R.drawable.check_box_unselected_new);
         }
         switch(list.getItem(position).getPriority()){
             case Globals.PRIORITY_NORMAL:
@@ -61,6 +72,7 @@ class MyAdapter extends ArrayAdapter<String> {
     class Holder {
         protected ImageView imageView1;
         protected TextView textView1;
+        protected TextView reminderText;
     }
 }
 

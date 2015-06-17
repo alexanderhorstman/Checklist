@@ -3,6 +3,7 @@ package com.example.alexh.checklist;
 
 public class Globals {
     public static StringArray list;
+    public static StringArray presets;
     public static final int PRIORITY_NORMAL = 100;
     public static final int PRIORITY_RUSH = 500;
     public static final int PRIORITY_URGENT = 900;

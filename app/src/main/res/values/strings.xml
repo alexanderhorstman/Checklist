@@ -15,10 +15,11 @@
     <string name="edit_task_title">Edit Task</string>
     <string name="exit">Quit</string>
     <string name="priority_normal_text">Normal</string>
-    <string name="priority_rush_text">Rush</string>
+    <string name="priority_rush_text">Medium</string>
     <string name="priority_text">Priority</string>
-    <string name="priority_urgent_text">Important</string>
+    <string name="priority_urgent_text">High</string>
     <string name="save_daily_presets">Save</string>
     <string name="select_all">Select All</string>
     <string name="task_text">Task Description</string>
+    <string name="reminder_text">Reminder</string>
 </resources>
