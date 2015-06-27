@@ -33,9 +33,7 @@ public class StringArray implements Serializable {
         }
     }
 
-    public void changeItemText(int position, Item item) {
-        list.set(position, item);
-    }
+
 
     public boolean checkSelectedAt(int index) {
         return list.get(index).isSelected();
@@ -84,6 +82,16 @@ public class StringArray implements Serializable {
         return strings;
     }
 
+    public void replaceItem(int position, Item item) {
+        if(item.getPriority() == getItem(position).getPriority()) {
+            list.set(position, item);
+        }
+        else {
+            list.remove(position);
+            addItem(item);
+        }
+    }
+
     public void selectAll() {
         if(checkAllSelected()) {
             for(int i = 0; i < list.size(); i++) {
@@ -95,7 +103,6 @@ public class StringArray implements Serializable {
                 list.get(i).setSelected(true);
             }
         }
-
     }
 
     public int sizeOf() {

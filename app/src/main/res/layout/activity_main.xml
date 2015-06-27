@@ -19,7 +19,7 @@
         <ListView
             android:divider="#ff000000"
             android:dividerHeight="1dp"
-            android:id="@+id/theListView"
+            android:id="@+id/mainListView"
             android:layout_height="440dp"
             android:layout_width="match_parent" />
 

@@ -2,6 +2,7 @@ package com.example.alexh.checklist;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,11 +13,14 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.io.ObjectOutputStream;
+
 public class SetDaily extends Activity {
-    private int itemPriority = Globals.PRIORITY_DAILY;
+    private int itemPriority = Item.PRIORITY_DAILY;
     private ListView theListView;
     private MyAdapter theAdapter;
 
+    /* can probably be removed
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -29,7 +33,7 @@ public class SetDaily extends Activity {
                     (Item)data.getSerializableExtra("new item"));
         }
         updateAdapter();
-    }
+    }*/
 
     @Override
     public void onBackPressed() {
@@ -44,14 +48,9 @@ public class SetDaily extends Activity {
         super.onCreate(savedInstanceState);
         //sets this as the active view
         setContentView(R.layout.set_daily);
-
-        //////////////////////////////
-        //sets the adapter to the view
-        //////////////////////////////
-
         //instantiates the adapter with the list
         theAdapter = new MyAdapter(this, Globals.presets.getStringArray(), Globals.presets);
-        //gets the list view and sets teh adapter to it
+        //gets the list view and sets the adapter to it
         theListView = (ListView) findViewById(R.id.theListView2);
         theListView.setAdapter(theAdapter);
         //sets the click behavior for the items in the list
@@ -59,11 +58,13 @@ public class SetDaily extends Activity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //finds the image view
-                ImageView image = (ImageView) findViewById(R.id.imageView1);
+                ImageView image = (ImageView) findViewById(R.id.checkboxImageView);
                 //changes the selected state of the item that was clicked on
-                Globals.presets.getItem(String.valueOf(parent.getItemAtPosition(position))).flipSelected();
+                Globals.presets.getItem(String.valueOf(parent.getItemAtPosition(position)))
+                        .flipSelected();
                 //changes the image associated with the item that was clicked on
-                if(Globals.presets.getItem(String.valueOf(parent.getItemAtPosition(position))).isSelected()) {
+                if(Globals.presets.getItem(String.valueOf(parent.getItemAtPosition(position)))
+                        .isSelected()) {
                     //selected image
                     image.setImageResource(R.drawable.check_box_selected_new);
                 }
@@ -96,12 +97,15 @@ public class SetDaily extends Activity {
                         //checks to make sure the text is not blank
                         if(!(input.getText().toString().equals(""))) {
                             //add the task to the list if it is not already in the list
-                            if(!Globals.presets.contains(new Item(input.getText().toString(), itemPriority))) {
-                                Item item = new Item(input.getText().toString(), Globals.PRIORITY_DAILY);
-                                Globals.presets.changeItemText(pos, item);
+                            if(!Globals.presets.contains(new Item(input.getText().toString(),
+                                    itemPriority))) {
+                                Item item = new Item(input.getText().toString(),
+                                        Item.PRIORITY_DAILY);
+                                Globals.presets.replaceItem(pos, item);
                             }
                             else {
-                                Toast.makeText(SetDaily.this, "The item " + input.getText() + " is already in the list",
+                                Toast.makeText(SetDaily.this, "The item " + input.getText()
+                                                + " is already in the list",
                                         Toast.LENGTH_SHORT).show();
                             }
                             //updates the adapter to update the images for the clicked item
@@ -185,21 +189,34 @@ public class SetDaily extends Activity {
         updateAdapter();
     }
 
+    public void savePresetsToFile() {
+        //save file name
+        String presetFileName = "presets.txt";
+        //opens the presets file and writes the presets to it without append
+        try {
+            ObjectOutputStream presetOutput =
+                    new ObjectOutputStream(openFileOutput(presetFileName, Context.MODE_PRIVATE));
+            presetOutput.writeObject(Globals.presets);
+            presetOutput.close();
+        }
+        catch(Exception e){}
+    }
 
     public void savePresets(View view) {
+        //save the presets list
+        savePresetsToFile();
         //create intent to send back
-        Intent sendListBack = new Intent();
-        //put list in the intent
-        sendListBack.putExtra("new presets", Globals.presets);
+        Intent returnToMain = new Intent();
         //set result code to ok
-        setResult(Globals.RESULT_OK_SET_DAILY, sendListBack);
+        setResult(RESULT_OK, returnToMain);
         //leave this activity
         finish();
     }
 
     private void updateAdapter() {
         //updates the adapter with a new list
-        theAdapter = new MyAdapter(getApplicationContext(),Globals.presets.getStringArray(), Globals.presets);
+        theAdapter = new MyAdapter(getApplicationContext(),Globals.presets.getStringArray(),
+                Globals.presets);
         //sets the updated adapter to the list view
         theListView.setAdapter(theAdapter);
         //refreshes the list view

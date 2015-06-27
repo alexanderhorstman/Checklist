@@ -12,7 +12,7 @@ import java.util.Calendar;
 public class TimePickerFragment extends DialogFragment
         implements TimePickerDialog.OnTimeSetListener{
 
-    private Time time;
+    private Time time = null;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -20,7 +20,14 @@ public class TimePickerFragment extends DialogFragment
         final Calendar calendar = Calendar.getInstance();
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = 0;
-
+        boolean isAm;
+        if(calendar.get(Calendar.AM_PM) == Calendar.AM) {
+            isAm = true;
+        }
+        else {
+            isAm = false;
+        }
+        time = new Time(calendar.get(Calendar.HOUR), minute, isAm, hour);
         return new TimePickerDialog(getActivity(), this, (hour + 1), minute, false);
     }
 

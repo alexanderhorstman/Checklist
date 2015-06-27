@@ -12,7 +12,7 @@ import java.util.Calendar;
 public class DatePickerFragment extends DialogFragment
         implements DatePickerDialog.OnDateSetListener{
 
-    Date date;
+    Date date = null;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -21,7 +21,7 @@ public class DatePickerFragment extends DialogFragment
         int year = c.get(Calendar.YEAR);
         int month = c.get(Calendar.MONTH);
         int day = c.get(Calendar.DAY_OF_MONTH);
-
+        date = new Date(month, day, year);
         // Create a new instance of DatePickerDialog and return it
         return new DatePickerDialog(getActivity(), this, year, month, day);
     }
@@ -31,7 +31,7 @@ public class DatePickerFragment extends DialogFragment
     }
 
     public void onDateSet(DatePicker view, int year, int month, int day) {
-        date = new Date((month + 1), day, year);
+        date = new Date(month, day, year);
         //update button text
         Button dayButton = (Button) getActivity().findViewById(R.id.reminder_day_picker_button);
         //dayButton.setText((month + 1) + "/" + day + "/" + year);

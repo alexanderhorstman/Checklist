@@ -2,26 +2,43 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.alexh.checklist" >
 
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
+    <uses-permission android:name="android.permission.SEND_SMS"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/icon"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        <activity
+        <activity android:configChanges="orientation|keyboardHidden"
             android:name=".MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SetDaily"
+        <activity android:configChanges="orientation|keyboardHidden"
+            android:name=".SetDaily"
             android:label="Set Daily Tasks"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme"/>
-        <activity android:name=".EditTask"
+        <activity android:configChanges="orientation|keyboardHidden"
+            android:name=".EditTask"
             android:label="Edit Task"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme"/>
+
+        <receiver android:name=".AlertReceiver"/>
+        <receiver android:name=".BootReceiver"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
 
     </application>
 

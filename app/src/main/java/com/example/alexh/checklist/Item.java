@@ -3,6 +3,11 @@ package com.example.alexh.checklist;
 import java.io.Serializable;
 
 public class Item implements Serializable {
+    public static final int PRIORITY_NORMAL = 100;
+    public static final int PRIORITY_MEDIUM = 500;
+    public static final int PRIORITY_HIGH = 900;
+    public static final int PRIORITY_DAILY = 300;
+
     private String task; //description of item
     private boolean selected = false; //describes whether the item has be selected or not by the user
     private int priority = 0; //priority of the task
@@ -26,6 +31,11 @@ public class Item implements Serializable {
 
     public Date getDate() {
         return date;
+    }
+
+    public int getIdNumber() {
+        return date.getYear() * 100000000 + date.getMonth() * 1000000 + date.getDay() * 1000 +
+                time.getHourOfDay() * 100 + time.getMinute();
     }
 
     public int getPriority() {

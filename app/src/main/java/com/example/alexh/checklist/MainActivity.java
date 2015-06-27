@@ -1,5 +1,7 @@
 package com.example.alexh.checklist;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
@@ -18,61 +20,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Calendar;
 
 
 public class MainActivity extends ActionBarActivity {
-    //private StringArray list = new StringArray();
-    //private StringArray presets = new StringArray();
-    private ListAdapter theAdapter;
-    private ListView theListView;
-    private String presetFileName = "presets.txt";
-    private String listFileName = "list.txt";
-
-    /*
-     * Overridden Methods
-     */
+    private ListAdapter listAdapter;
+    private ListView listView;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        //if result code is ok then save the new presets, if not do nothing
-        if (resultCode == Globals.RESULT_OK_SET_DAILY) {
-            Globals.presets = (StringArray) data.getSerializableExtra("new presets");
-            //save the new presets list
-            savePresets();
-        }
-        else if (resultCode == Globals.RESULT_OK_EDIT_TASK) {
-            Globals.list.addItem((Item) data.getSerializableExtra("new item"));
-            //save the list with the new item
-            saveList();
-        }
-        else if (resultCode == Globals.RESULT_OK_EDIT_TASK_WITH_ADD_PRESETS) {
-            Globals.list.addItem((Item) data.getSerializableExtra("new item"));
-            //change the priority so that the item appears as a daily task
-            Item newItem = new Item(data.getSerializableExtra("new item").toString(), Globals.PRIORITY_DAILY);
-            Globals.presets.addItem(newItem);
-            //save the list with the new item
-            saveList();
-            //save the presets with the new item
-            savePresets();
-        }
-        else if(resultCode == Globals.RESULT_REPLACE_IN_LIST){
-            Globals.list.changeItemText(data.getIntExtra("item position", 0), (Item)data.getSerializableExtra("new item"));
-            //re-order list with new priority
-            reOrderList(data.getIntExtra("item position", 0), ((Item)data.getSerializableExtra("new item")).getPriority());
-            //save the list with the new item
-            saveList();
-        }
-        else if(resultCode == Globals.RESULT_REPLACE_IN_LIST_WITH_ADD_PRESETS){
-            Globals.list.changeItemText(data.getIntExtra("item position", 0), (Item)data.getSerializableExtra("new item"));
-            //re-order list with new priority
-            reOrderList(data.getIntExtra("item position", 0), ((Item)data.getSerializableExtra("new item")).getPriority());
-            Globals.presets.addItem((Item) data.getSerializableExtra("new item"));
-            //save the list with the new item
-            saveList();
-            //save the presets with the new item
-            savePresets();
-        }
         updateAdapter();
     }
 
@@ -86,32 +43,31 @@ public class MainActivity extends ActionBarActivity {
         //sets the main content
         setContentView(R.layout.activity_main);
         //instantiates the adapter with the list
-        theAdapter = new MyAdapter(this, Globals.list.getStringArray(), Globals.list);
+        listAdapter = new MyAdapter(this, Globals.list.getStringArray(), Globals.list);
         //gets the list view and sets teh adapter to it
-        theListView = (ListView) findViewById(R.id.theListView);
-        theListView.setAdapter(theAdapter);
+        listView = (ListView) findViewById(R.id.mainListView);
+        listView.setAdapter(listAdapter);
         //sets the click behavior for the items in the list
-        theListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //finds the image view
-                ImageView image = (ImageView) findViewById(R.id.imageView1);
+                ImageView image = (ImageView) findViewById(R.id.checkboxImageView);
                 //changes the selected state of the item that was clicked on
                 Globals.list.getItem(String.valueOf(parent.getItemAtPosition(position))).flipSelected();
                 //changes the image associated with the item that was clicked on
-                if(Globals.list.getItem(String.valueOf(parent.getItemAtPosition(position))).isSelected()) {
+                if (Globals.list.getItem(String.valueOf(parent.getItemAtPosition(position))).isSelected()) {
                     //selected image
                     image.setImageResource(R.drawable.check_box_selected);
-                }
-                else {
+                } else {
                     //unselected image
                     image.setImageResource(R.drawable.check_box_unselected);
                 }
                 //updates the adapter to update the images for the clicked item
-                ((BaseAdapter)theAdapter).notifyDataSetChanged();
+                ((BaseAdapter) listAdapter).notifyDataSetChanged();
             }
         });
-        theListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 //changes activity to edit task
@@ -119,15 +75,28 @@ public class MainActivity extends ActionBarActivity {
                 final int result = 1;
                 //sets extra info to be received in the edit task activity
                 editTask.putExtra("task description", Globals.list.getItem(position).getTask());
-                //
+                //puts item position into extras
                 editTask.putExtra("item position", position);
-                //
+                //puts priority level into extras
                 editTask.putExtra("priority level", Globals.list.getItem(position).getPriority());
                 //starts the edit task activity
                 startActivityForResult(editTask, result);
                 return false;
             }
         });
+        //set daily tasks to be added to list every day at midnight
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        AlarmManager alarmManager =
+                (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        Intent alarmIntent = new Intent(this, AlertReceiver.class);
+        alarmIntent.putExtra("alarm type", "add daily");
+        //set alarm to trigger at midnight every day
+        alarmManager.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(),
+                AlarmManager.INTERVAL_DAY,
+                PendingIntent.getBroadcast(this, 0, alarmIntent, 0));
     }
 
     @Override
@@ -143,7 +112,7 @@ public class MainActivity extends ActionBarActivity {
         //selects all of the items in the list
         if (id == R.id.select_all) {
             Globals.list.selectAll();
-            ((BaseAdapter)theAdapter).notifyDataSetChanged();
+            ((BaseAdapter) listAdapter).notifyDataSetChanged();
             return true;
         }
         //sets the presets that can be added to the list
@@ -215,6 +184,15 @@ public class MainActivity extends ActionBarActivity {
                 if(Globals.presets.contains(Globals.list.getItem(index))) {
                     Globals.list.getItem(index).flipSelected();
                 }
+                //cancel reminder if the item has one
+                if(Globals.list.getItem(index).hasReminder()) {
+                    AlarmManager alarmManager =
+                            (AlarmManager) getBaseContext().getSystemService(Context.ALARM_SERVICE);
+                    Intent intent = new Intent(getBaseContext(), AlertReceiver.class);
+                    alarmManager.cancel(PendingIntent.getBroadcast(getBaseContext(),
+                            Globals.list.getItem(index).getIdNumber(), intent,
+                            PendingIntent.FLAG_UPDATE_CURRENT));
+                }
                 //deletes item
                 Globals.list.deleteItem(index);
             }
@@ -228,7 +206,7 @@ public class MainActivity extends ActionBarActivity {
     private void readPresets() {
         try {
             //creates object input stream using preset file name
-            ObjectInputStream presetInput = new ObjectInputStream(openFileInput(presetFileName));
+            ObjectInputStream presetInput = new ObjectInputStream(openFileInput(Globals.presetFileName));
             //reads list in from file
             Globals.presets = (StringArray) presetInput.readObject();
             //closes file
@@ -237,7 +215,7 @@ public class MainActivity extends ActionBarActivity {
         //if the file was not found
         catch(FileNotFoundException e){
             //make a new file object using preset file name
-            File presetsFile = new File(this.getFilesDir().getAbsolutePath(), presetFileName);
+            File presetsFile = new File(this.getFilesDir().getAbsolutePath(), Globals.presetFileName);
             //try to create a new file, quit if system cannot create new file
             try{presetsFile.createNewFile();}
             catch(Exception f){Toast.makeText(this, "The presets file could not be created. Shutting down.",
@@ -252,7 +230,7 @@ public class MainActivity extends ActionBarActivity {
     private void readSavedList() {
         try {
             //creates object input stream using preset file name
-            ObjectInputStream listInput = new ObjectInputStream(openFileInput(listFileName));
+            ObjectInputStream listInput = new ObjectInputStream(openFileInput(Globals.listFileName));
             //reads list in from file
             Globals.list = (StringArray) listInput.readObject();
             //closes file
@@ -261,22 +239,19 @@ public class MainActivity extends ActionBarActivity {
         //if the file was not found
         catch(FileNotFoundException e){
             //make a new file object using preset file name
-            File listFile = new File(this.getFilesDir().getAbsolutePath(), listFileName);
+            File listFile = new File(this.getFilesDir().getAbsolutePath(), Globals.listFileName);
             //try to create a new file, quit if system cannot create new file
             try{listFile.createNewFile();}
             catch(Exception f){Toast.makeText(this, "The list file could not be created. Shutting down.",
                     Toast.LENGTH_LONG).show();
-                try{wait(2000);}catch(Exception a){}
+                try {
+                    wait(2000);
+                }
+                catch(Exception a){}
                 finish();
             }
         }
         catch(Exception f){}
-    }
-
-    private void reOrderList(int position, int newPriority){
-        Item tempItem = new Item(Globals.list.getItem(position).getTask(), newPriority);
-        Globals.list.deleteItem(position);
-        Globals.list.addItem(tempItem);
     }
 
     public void setPreset() {
@@ -289,28 +264,19 @@ public class MainActivity extends ActionBarActivity {
 
     public void saveList() {
         //opens the list file and writes the list to it without append
-        try{ObjectOutputStream listOutput = new ObjectOutputStream(openFileOutput(listFileName, Context.MODE_PRIVATE));
+        try{ObjectOutputStream listOutput = new ObjectOutputStream(openFileOutput(Globals.listFileName, Context.MODE_PRIVATE));
             listOutput.writeObject(Globals.list);
             listOutput.close();
         }
         catch(Exception e){}
     }
 
-    public void savePresets() {
-        //opens the presets file and writes the presets to it without append
-        try{ObjectOutputStream presetOutput = new ObjectOutputStream(openFileOutput(presetFileName, Context.MODE_PRIVATE));
-            presetOutput.writeObject(Globals.presets);
-            presetOutput.close();
-        }
-        catch(Exception e){}
-    }
-
     private void updateAdapter() {
         //updates the adapter with a new list
-        theAdapter = new MyAdapter(getApplicationContext(),Globals.list.getStringArray(), Globals.list);
+        listAdapter = new MyAdapter(getApplicationContext(),Globals.list.getStringArray(), Globals.list);
         //sets the updated adapter to the list view
-        theListView.setAdapter(theAdapter);
+        listView.setAdapter(listAdapter);
         //refreshes the list view
-        theListView.refreshDrawableState();
+        listView.refreshDrawableState();
     }
 }

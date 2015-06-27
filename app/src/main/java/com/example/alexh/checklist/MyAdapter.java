@@ -27,7 +27,7 @@ class MyAdapter extends ArrayAdapter<String> {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = inflater.inflate(R.layout.row_layout_2, null);
             viewHolder.textView1 = (TextView) view.findViewById(R.id.textView1);
-            viewHolder.imageView1 = (ImageView) view.findViewById(R.id.imageView1);
+            viewHolder.imageView1 = (ImageView) view.findViewById(R.id.checkboxImageView);
             viewHolder.reminderText = (TextView) view.findViewById(R.id.reminder_text);
             view.setTag(viewHolder);
         }
@@ -53,16 +53,16 @@ class MyAdapter extends ArrayAdapter<String> {
             viewHolder.imageView1.setImageResource(R.drawable.check_box_unselected_new);
         }
         switch(list.getItem(position).getPriority()){
-            case Globals.PRIORITY_NORMAL:
+            case Item.PRIORITY_NORMAL:
                 viewHolder.textView1.setTextColor(Color.BLACK);
                 break;
-            case Globals.PRIORITY_RUSH:
+            case Item.PRIORITY_MEDIUM:
                 viewHolder.textView1.setTextColor(Color.rgb(255, 141, 0));
                 break;
-            case Globals.PRIORITY_URGENT:
+            case Item.PRIORITY_HIGH:
                 viewHolder.textView1.setTextColor(Color.RED);
                 break;
-            case Globals.PRIORITY_DAILY:
+            case Item.PRIORITY_DAILY:
                 viewHolder.textView1.setTextColor(Color.BLUE);
                 break;
         }
