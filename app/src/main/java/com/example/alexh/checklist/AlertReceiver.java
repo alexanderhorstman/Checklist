@@ -16,22 +16,44 @@ import java.util.Random;
 
 public class AlertReceiver extends BroadcastReceiver{
 
-    int priority;
-    Context context;
+    Context context; //used to store the context of teh calling activity
+    int priority; //used to determine the color of the icon on the notification panel
 
     @Override
     public void onReceive(Context context, Intent intent) {
         this.context = context;
+        //the type of alarm that is waking up the app
         String alarmType = intent.getStringExtra("alarm type");
+        //alarm to add the daily tasks to the list
         if(alarmType.equals("add daily")) {
             addAllDailyTasks();
         }
+        //alarm to make a notification to display
         else if(alarmType.equals("create notification")) {
+            //get the description of the item from the intent
             String task = intent.getStringExtra("task");
+            //get the priority of the item from the intent
             priority = intent.getIntExtra("priority", Item.PRIORITY_NORMAL);
             createNotification(context, "Checklist Reminder", task, "Checklist Reminder");
         }
+    }
 
+    private void addAllDailyTasks() {
+        //try block will only work if the presets list has items in it
+        try {
+            for(int i = 0; i < Globals.presets.sizeOf(); i++) {
+                //searches the list for the preset task
+                if (!(Globals.list.contains(Globals.presets.getItem(i)))) {
+                    //adds item if it was not already present
+                    Globals.list.addItem(Globals.presets.getItem(i));
+                }
+            }
+            //save list and update adapter
+            saveList();
+            updateAdapter();
+        }
+        //if no presets set, do nothing
+        catch(Exception NulLPointerException) {}
     }
 
     private void createNotification(Context context, String message, String messageText,
@@ -47,6 +69,7 @@ public class AlertReceiver extends BroadcastReceiver{
                         .setTicker(messageAlert)
                         .setContentText(messageText);
 
+        //set the icon for the notification
         if(priority == Item.PRIORITY_NORMAL) {
             builder.setSmallIcon(R.drawable.normal_priority_reminder_icon);
         }
@@ -77,21 +100,6 @@ public class AlertReceiver extends BroadcastReceiver{
         notificationManager.notify(id, builder.build());
     }
 
-    private void addAllDailyTasks() {
-        try {
-            for(int i = 0; i < Globals.presets.sizeOf(); i++) {
-                //searches the list for the preset task
-                if (!(Globals.list.contains(Globals.presets.getItem(i)))) {
-                    //adds item if it was not already present
-                    Globals.list.addItem(Globals.presets.getItem(i));
-                }
-            }
-            saveList();
-            updateAdapter();
-        }
-        catch(Exception NulLPointerException) {}
-    }
-
     public void saveList() {
         //opens the list file and writes the list to it without append
         try{ObjectOutputStream listOutput =
@@ -103,8 +111,10 @@ public class AlertReceiver extends BroadcastReceiver{
     }
 
     private void updateAdapter() {
+        //get a view for the main activity with an inflater
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.activity_main, null);
+        //get the ListView to update the list after the items are added
         ListView listView = (ListView) view.findViewById(R.id.mainListView);
         //updates the adapter with a new list
         MyAdapter adapter = new MyAdapter(context, Globals.list.getStringArray(), Globals.list);

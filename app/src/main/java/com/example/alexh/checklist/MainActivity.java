@@ -24,20 +24,26 @@ import java.util.Calendar;
 
 
 public class MainActivity extends ActionBarActivity {
-    private ListAdapter listAdapter;
-    private ListView listView;
+    private ListAdapter listAdapter; //the adapter that converts the list into views for the listView
+    private ListView listView; //list view that shows all of the items in the list
 
+    //fires when the app returns to this activity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        //updates the adapter with the global list
         updateAdapter();
     }
 
+    //fires when the app first starts up
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Globals.list = new StringArray();
-        Globals.presets = new StringArray();
+        //initializes the global list and the global daily presets list
+        Globals.list = new ItemArray();
+        Globals.presets = new ItemArray();
+        //try to read the saved list and the daily presets from file
+        //if nothing is read from the file then the list or presets will be empty
         readSavedList();
         readPresets();
         //sets the main content
@@ -96,9 +102,10 @@ public class MainActivity extends ActionBarActivity {
         //set alarm to trigger at midnight every day
         alarmManager.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(),
                 AlarmManager.INTERVAL_DAY,
-                PendingIntent.getBroadcast(this, 0, alarmIntent, 0));
+                PendingIntent.getBroadcast(this, 999, alarmIntent, 0));
     }
 
+    //creates the options menu when the menu button is clicked
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -106,8 +113,10 @@ public class MainActivity extends ActionBarActivity {
         return true;
     }
 
+    //fired when an item in the options menu is selected
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        //gets the id of the menu item selected
         int id = item.getItemId();
         //selects all of the items in the list
         if (id == R.id.select_all) {
@@ -127,23 +136,25 @@ public class MainActivity extends ActionBarActivity {
         }
         //closes the app
         else if(id == R.id.exit) {
-
             finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
+    //fired when the add item button is clicked
+    //starts a new EditTask activity
     public void addItem(View view) {
         //changes activity to edit task
         Intent editTask = new Intent(this, EditTask.class);
         final int result = 1;
         //sets extra info to be received in the edit task activity
-        editTask.putExtra("task description", "");
+        editTask.putExtra("task description", ""); //could have done this differently; could have had an boolean extra saying whether the item was being edited or not, and then if it was get the item description then
         //starts the edit task activity
         startActivityForResult(editTask, result);
     }
 
+    //adds all of the presets to the list if they are not already in the list
     private void addPreset() {
         if(Globals.presets.sizeOf() != 0) {
             //adds the presets items if they are not already in the list
@@ -161,6 +172,8 @@ public class MainActivity extends ActionBarActivity {
         saveList();
     }
 
+    //fired when the complete selected button is clicked
+    //deletes from the list all of the items that are checked
     public void deleteSelected(View view) {
         //holds the items to be deleted, will delete everything at once
         int[] toDelete = new int[Globals.list.sizeOf()];
@@ -203,12 +216,13 @@ public class MainActivity extends ActionBarActivity {
         saveList();
     }
 
+    //tries to read from the presets file and assign that list to the global presets list
     private void readPresets() {
         try {
             //creates object input stream using preset file name
             ObjectInputStream presetInput = new ObjectInputStream(openFileInput(Globals.presetFileName));
             //reads list in from file
-            Globals.presets = (StringArray) presetInput.readObject();
+            Globals.presets = (ItemArray) presetInput.readObject();
             //closes file
             presetInput.close();
         }
@@ -227,12 +241,13 @@ public class MainActivity extends ActionBarActivity {
         catch(Exception f){}
     }
 
+    //tries to read from the list file and assign that list to the global list (main list)
     private void readSavedList() {
         try {
             //creates object input stream using preset file name
             ObjectInputStream listInput = new ObjectInputStream(openFileInput(Globals.listFileName));
             //reads list in from file
-            Globals.list = (StringArray) listInput.readObject();
+            Globals.list = (ItemArray) listInput.readObject();
             //closes file
             listInput.close();
         }
@@ -254,6 +269,7 @@ public class MainActivity extends ActionBarActivity {
         catch(Exception f){}
     }
 
+    //starts a new SetDaily activity
     public void setPreset() {
         //changes activity to get presets
         Intent getPresetList = new Intent(this, SetDaily.class);
@@ -262,6 +278,7 @@ public class MainActivity extends ActionBarActivity {
         startActivityForResult(getPresetList, result);
     }
 
+    //saves the list to its file
     public void saveList() {
         //opens the list file and writes the list to it without append
         try{ObjectOutputStream listOutput = new ObjectOutputStream(openFileOutput(Globals.listFileName, Context.MODE_PRIVATE));
@@ -271,6 +288,7 @@ public class MainActivity extends ActionBarActivity {
         catch(Exception e){}
     }
 
+    //updates the adapter with the newest version of the global list
     private void updateAdapter() {
         //updates the adapter with a new list
         listAdapter = new MyAdapter(getApplicationContext(),Globals.list.getStringArray(), Globals.list);

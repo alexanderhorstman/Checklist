@@ -16,25 +16,11 @@ import android.widget.Toast;
 import java.io.ObjectOutputStream;
 
 public class SetDaily extends Activity {
-    private int itemPriority = Item.PRIORITY_DAILY;
-    private ListView theListView;
-    private MyAdapter theAdapter;
+    private int itemPriority = Item.PRIORITY_DAILY; //default priority for items in the daily presets list
+    private ListView listView; //list view that shows all of the items in the presets list
+    private MyAdapter adapter; //the adapter that converts the list into views for the listView
 
-    /* can probably be removed
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        //if result code is ok then save the new presets, if not do nothing
-        if (resultCode == Globals.RESULT_OK_EDIT_TASK) {
-            Globals.presets.addItem((Item) data.getSerializableExtra("new item"));
-        }
-        else if(resultCode == Globals.RESULT_REPLACE_IN_LIST){
-            Globals.presets.changeItemText(data.getIntExtra("item position", 0),
-                    (Item)data.getSerializableExtra("new item"));
-        }
-        updateAdapter();
-    }*/
-
+    //fired when the back button is pressed
     @Override
     public void onBackPressed() {
         //set result code to canceled
@@ -43,18 +29,19 @@ public class SetDaily extends Activity {
         finish();
     }
 
+    //fired when the activity starts
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //sets this as the active view
         setContentView(R.layout.set_daily);
         //instantiates the adapter with the list
-        theAdapter = new MyAdapter(this, Globals.presets.getStringArray(), Globals.presets);
+        adapter = new MyAdapter(this, Globals.presets.getStringArray(), Globals.presets);
         //gets the list view and sets the adapter to it
-        theListView = (ListView) findViewById(R.id.theListView2);
-        theListView.setAdapter(theAdapter);
+        listView = (ListView) findViewById(R.id.theListView2);
+        listView.setAdapter(adapter);
         //sets the click behavior for the items in the list
-        theListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //finds the image view
@@ -63,21 +50,20 @@ public class SetDaily extends Activity {
                 Globals.presets.getItem(String.valueOf(parent.getItemAtPosition(position)))
                         .flipSelected();
                 //changes the image associated with the item that was clicked on
-                if(Globals.presets.getItem(String.valueOf(parent.getItemAtPosition(position)))
+                if (Globals.presets.getItem(String.valueOf(parent.getItemAtPosition(position)))
                         .isSelected()) {
                     //selected image
                     image.setImageResource(R.drawable.check_box_selected_new);
-                }
-                else {
+                } else {
                     //unselected image
                     image.setImageResource(R.drawable.check_box_unselected_new);
                 }
                 //updates the adapter to update the images for the clicked item
-                theAdapter.notifyDataSetChanged();
+                adapter.notifyDataSetChanged();
                 //updateAdapter();
             }
         });
-        theListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 //instantiates an alert for the user to add a new task
@@ -95,15 +81,14 @@ public class SetDaily extends Activity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //checks to make sure the text is not blank
-                        if(!(input.getText().toString().equals(""))) {
+                        if (!(input.getText().toString().equals(""))) {
                             //add the task to the list if it is not already in the list
-                            if(!Globals.presets.contains(new Item(input.getText().toString(),
+                            if (!Globals.presets.contains(new Item(input.getText().toString(),
                                     itemPriority))) {
                                 Item item = new Item(input.getText().toString(),
                                         Item.PRIORITY_DAILY);
                                 Globals.presets.replaceItem(pos, item);
-                            }
-                            else {
+                            } else {
                                 Toast.makeText(SetDaily.this, "The item " + input.getText()
                                                 + " is already in the list",
                                         Toast.LENGTH_SHORT).show();
@@ -161,6 +146,7 @@ public class SetDaily extends Activity {
         alert.show();
     }
 
+    //deletes the items in the list that are selected
     public void deleteSelected(View view) {
         //holds the items to be deleted, will delete everything at once
         int[] toDelete = new int[Globals.presets.sizeOf()];
@@ -189,6 +175,19 @@ public class SetDaily extends Activity {
         updateAdapter();
     }
 
+    //saves the presets and returns to the main activity
+    public void savePresets(View view) {
+        //save the presets list
+        savePresetsToFile();
+        //create intent to send back
+        Intent returnToMain = new Intent();
+        //set result code to ok
+        setResult(RESULT_OK, returnToMain);
+        //leave this activity
+        finish();
+    }
+
+    //tries to save the presets to its file
     public void savePresetsToFile() {
         //save file name
         String presetFileName = "presets.txt";
@@ -202,24 +201,14 @@ public class SetDaily extends Activity {
         catch(Exception e){}
     }
 
-    public void savePresets(View view) {
-        //save the presets list
-        savePresetsToFile();
-        //create intent to send back
-        Intent returnToMain = new Intent();
-        //set result code to ok
-        setResult(RESULT_OK, returnToMain);
-        //leave this activity
-        finish();
-    }
-
+    //updates the adapter with the current version of the presets list
     private void updateAdapter() {
         //updates the adapter with a new list
-        theAdapter = new MyAdapter(getApplicationContext(),Globals.presets.getStringArray(),
+        adapter = new MyAdapter(getApplicationContext(),Globals.presets.getStringArray(),
                 Globals.presets);
         //sets the updated adapter to the list view
-        theListView.setAdapter(theAdapter);
+        listView.setAdapter(adapter);
         //refreshes the list view
-        theListView.refreshDrawableState();
+        listView.refreshDrawableState();
     }
 }

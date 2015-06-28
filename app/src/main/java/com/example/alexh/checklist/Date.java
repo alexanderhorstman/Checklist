@@ -4,16 +4,18 @@ import java.io.Serializable;
 
 public class Date implements Serializable {
 
-    private int month;
-    private int day;
-    private int year;
+    private int day; //day of the month; 1 - 31
+    private int month; //month of the year; 0 - 11
+    private int year; //year 0000 -9999
 
+    //constructor takes date in format month, day, year
     public Date(int month, int day, int year) {
         this.month = month;
         this.day = day;
         this.year = year;
     }
 
+    //returns true if the day, the month, and year are all equal
     public boolean equals(Date date) {
         if(day == date.getDay() && month == date.getMonth() && year == date.getYear()) {
             return true;
@@ -33,6 +35,7 @@ public class Date implements Serializable {
         return year;
     }
 
+    //returns the date as a String in the form mm/dd/yyyy
     public String toString() {
         return (month + 1) + "/" + day + "/" + year;
     }

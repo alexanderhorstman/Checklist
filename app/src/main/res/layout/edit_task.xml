@@ -103,22 +103,19 @@
 
         </RadioGroup>
 
-        <!--//////////////////////////////////////-->
         <CheckBox
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:id="@+id/include_reminder_checkbox"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:onClick="toggleReminderStatus"
             android:text="@string/reminder_text"
-            android:textSize="25sp"
             android:textColor="#ff000000"
-            android:onClick="toggleReminderStatus"/>
+            android:textSize="25sp" />
 
         <View
             android:background="#ff2d2d2d"
             android:layout_height="2dp"
             android:layout_width="match_parent" />
-
-
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -127,25 +124,22 @@
             android:paddingBottom="20dp">
 
            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/reminder_time_picker_button"
+               android:id="@+id/reminder_time_picker_button"
+               android:layout_height="wrap_content"
                android:layout_weight="1"
-               android:paddingLeft="15dp"
-               android:onClick="chooseReminderTime"/>
+               android:layout_width="wrap_content"
+               android:onClick="chooseReminderTime"
+               android:paddingLeft="15dp" />
 
            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/reminder_day_picker_button"
+               android:id="@+id/reminder_day_picker_button"
+               android:layout_height="wrap_content"
                android:layout_weight="1"
-               android:paddingRight="15dp"
-               android:onClick="chooseReminderDay"/>
+               android:layout_width="wrap_content"
+               android:onClick="chooseReminderDay"
+               android:paddingRight="15dp" />
 
             </LinearLayout>
-
-
-        <!--//////////////////////////////////////-->
 
         <View
             android:background="#ff2d2d2d"

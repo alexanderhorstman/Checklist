@@ -3,18 +3,19 @@ package com.example.alexh.checklist;
 import java.io.Serializable;
 
 public class Item implements Serializable {
-    public static final int PRIORITY_NORMAL = 100;
-    public static final int PRIORITY_MEDIUM = 500;
-    public static final int PRIORITY_HIGH = 900;
     public static final int PRIORITY_DAILY = 300;
+    public static final int PRIORITY_HIGH = 900;
+    public static final int PRIORITY_MEDIUM = 500;
+    public static final int PRIORITY_NORMAL = 100;
 
-    private String task; //description of item
     private boolean selected = false; //describes whether the item has be selected or not by the user
+    private Date date; //date of the reminder if the item has one
     private int priority = 0; //priority of the task
-    private Time time;
-    private Date date;
+    private String task; //description of item
+    private Time time; //time of the reminder if the item has one
 
-    //constructor sets the description of the item
+    //constructor sets the description of the item and priority
+    //nulls out the time and date since it has no reminder
     public Item(String task, int priority) {
         this.task = task;
         this.priority = priority;
@@ -22,6 +23,8 @@ public class Item implements Serializable {
         date = null;
     }
 
+    //constructor sets the description and priority of the item
+    //also sets the time and date of the reminder
     public Item(String task, int priority, Time time, Date date) {
         this.task = task;
         this.priority = priority;
@@ -33,9 +36,15 @@ public class Item implements Serializable {
         return date;
     }
 
+    //id number is used to set reminders using semi-unique id numbers
+    //id numbers are created using the reminder date and time
+    //could also be used to sort based on reminder time
     public int getIdNumber() {
-        return date.getYear() * 100000000 + date.getMonth() * 1000000 + date.getDay() * 1000 +
-                time.getHourOfDay() * 100 + time.getMinute();
+        if(date != null && time != null) {
+            return date.getYear() * 100000000 + date.getMonth() * 1000000 + date.getDay() * 1000 +
+                    time.getHourOfDay() * 100 + time.getMinute();
+        }
+        return 0;
     }
 
     public int getPriority() {
@@ -59,23 +68,12 @@ public class Item implements Serializable {
         }
     }
 
-    public void setPriority(int priority) {
-        this.priority = priority;
-    }
-
-    public void setSelected(boolean selected) {
-        this.selected = selected;
-    }
-
-    public void setTask(String task){
-        this.task = task;
-    }
-
     //returns the selected state
     public boolean isSelected() {
         return selected;
     }
 
+    //returns true if the task and reminder is the same
     public boolean equals(Item item) {
         if(!item.hasReminder() && !hasReminder()) {
             if(item.task.equals(task)) {
@@ -101,6 +99,18 @@ public class Item implements Serializable {
         else {
             selected = true;
         }
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+    }
+
+    public void setTask(String task){
+        this.task = task;
     }
 
     //returns the description of the item

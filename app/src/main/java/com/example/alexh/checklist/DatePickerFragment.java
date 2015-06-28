@@ -12,8 +12,9 @@ import java.util.Calendar;
 public class DatePickerFragment extends DialogFragment
         implements DatePickerDialog.OnDateSetListener{
 
-    Date date = null;
+    private Date date = null; //the date that will be chosen; current day is the default
 
+    //fired when the fragment is created
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use the current date as the default date in the picker
@@ -30,6 +31,7 @@ public class DatePickerFragment extends DialogFragment
         return date;
     }
 
+    //fired when a date is chosen from the dialog
     public void onDateSet(DatePicker view, int year, int month, int day) {
         date = new Date(month, day, year);
         //update button text

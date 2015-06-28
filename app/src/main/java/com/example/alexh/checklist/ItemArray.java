@@ -3,18 +3,11 @@ package com.example.alexh.checklist;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class StringArray implements Serializable {
-    private ArrayList<Item> list = new ArrayList<>();
+public class ItemArray implements Serializable {
+    private ArrayList<Item> list = new ArrayList<>(); //the array list that holds all of the items
 
     //constructor does nothing
-    public StringArray(){}
-
-    //constructor makes a list from an array of items
-    public StringArray(Item[] array) {
-        for(int i = 0; i < array.length; i++) {
-            list.add(array[i]);
-        }
-    }
+    public ItemArray(){}
 
     //adds an item to the list
     public void addItem(Item item) {
@@ -25,6 +18,7 @@ public class StringArray implements Serializable {
             while(pos >= 0 && item.getPriority() > list.get(pos).getPriority()){
                 pos--;
             }
+            //add one because the item should be inserted above the one that it was just compared to
             pos++;
             list.add(pos, item);
         }
@@ -33,12 +27,12 @@ public class StringArray implements Serializable {
         }
     }
 
-
-
+    //returns true if the item at index is checked
     public boolean checkSelectedAt(int index) {
         return list.get(index).isSelected();
     }
 
+    //returns true if the list has the given item in it
     public boolean contains(Item item) {
         for(int i = 0; i < list.size(); i++) {
             if(item.equals(getItem(i))) {
@@ -58,6 +52,8 @@ public class StringArray implements Serializable {
         list.remove(index);
     }
 
+
+    //returns the item with the description matching the given string
     public Item getItem(String string) {
         int index = -1;
         for(int count = 0; count < list.size(); count++) {
@@ -69,6 +65,7 @@ public class StringArray implements Serializable {
         return list.get(index);
     }
 
+    //returns the item at the position in the list
     public Item getItem(int position) {
         return list.get(position);
     }
@@ -82,6 +79,7 @@ public class StringArray implements Serializable {
         return strings;
     }
 
+    //replace the item at the given position in the list with the given item
     public void replaceItem(int position, Item item) {
         if(item.getPriority() == getItem(position).getPriority()) {
             list.set(position, item);
@@ -92,6 +90,7 @@ public class StringArray implements Serializable {
         }
     }
 
+    //checks all items in the list
     public void selectAll() {
         if(checkAllSelected()) {
             for(int i = 0; i < list.size(); i++) {
@@ -105,14 +104,17 @@ public class StringArray implements Serializable {
         }
     }
 
+    //returns the number of items in the list
     public int sizeOf() {
         return list.size();
     }
 
+    //deselects the item at the given position
     public void unselect(int position) {
         list.get(position).setSelected(false);
     }
 
+    //returns true if all of the items in the list are selected
     private boolean checkAllSelected() {
         for(int i = 0; i < list.size(); i++) {
             if(!list.get(i).isSelected()) {

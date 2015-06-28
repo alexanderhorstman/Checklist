@@ -39,6 +39,7 @@ public class BootReceiver extends BroadcastReceiver {
             //reset alarm to add daily items at midnight
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(System.currentTimeMillis());
+            //set time to midnight
             calendar.set(Calendar.HOUR_OF_DAY, 0);
             calendar.set(Calendar.MINUTE, 0);
             AlarmManager alarmManager =
@@ -48,7 +49,7 @@ public class BootReceiver extends BroadcastReceiver {
             //set alarm to trigger at midnight every day
             alarmManager.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(),
                     AlarmManager.INTERVAL_DAY,
-                    PendingIntent.getBroadcast(context, 0, alarmIntent, 0));
+                    PendingIntent.getBroadcast(context, 999, alarmIntent, 0));
             //add the daily items to the list if they are not already there
             for(int i = 0; i < Globals.presets.sizeOf(); i++) {
                 //searches the list for the preset task
